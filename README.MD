@@ -16,6 +16,6 @@ I'n not sure, but it looks like a bug, because at least for the streets request 
 - add reporting tool
 - add docker configuration
 - prettify code
-- prettify model
-- update readme
-- add linter
+- ~~prettify model~~
+- ~~update readme~~
+- ~~add linter~~
