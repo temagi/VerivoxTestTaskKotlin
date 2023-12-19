@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.9.0"
     application
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
 group = "org.example"
@@ -11,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.pinterest.ktlint:ktlint-cli:1.1.0")
     testImplementation(kotlin("test"))
     testImplementation("io.rest-assured:rest-assured:5.3.1")
     testImplementation("io.rest-assured:json-path:5.3.1")

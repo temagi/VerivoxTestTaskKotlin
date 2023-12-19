@@ -12,6 +12,7 @@ fun getResource(name: String): List<String> {
 
 fun readProperty(name: String): String = defaultProperties.getProperty(name)
 
-private val defaultProperties: Properties = Properties().apply {
-    load(FileReader(File("src/test/resources/config.properties")))
-}
+private val defaultProperties: Properties =
+    Properties().apply {
+        load(FileReader(File("src/test/resources/config.properties")))
+    }

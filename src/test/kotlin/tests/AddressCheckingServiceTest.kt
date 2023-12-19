@@ -17,10 +17,11 @@ class AddressCheckingServiceTest : DescribeSpec({
 
         context("Valid German postcodes") {
 
-            val validPostcodes = listOf(
-                Postcode(10409, listOf("Berlin")),
-                Postcode(77716, listOf("Fischerbach", "Haslach", "Hofstetten"))
-            )
+            val validPostcodes =
+                listOf(
+                    Postcode(10409, listOf("Berlin")),
+                    Postcode(77716, listOf("Fischerbach", "Haslach", "Hofstetten")),
+                )
 
             validPostcodes.forEach { code ->
 
@@ -55,14 +56,15 @@ class AddressCheckingServiceTest : DescribeSpec({
 
         context("Find the streets for a given postcode") {
 
-            val streets = listOf(
-                Streets(10409, "Berlin", getResource("Berlin")),
-                Streets(77716, "Fischerbach", getResource("Fischerbach")),
-                Streets(77716, "Haslach", getResource("Haslach")),
-                Streets(77716, "Hofstetten", getResource("Hofstetten"))
-            )
+            val streets =
+                listOf(
+                    Streets(10409, "Berlin", getResource("Berlin")),
+                    Streets(77716, "Fischerbach", getResource("Fischerbach")),
+                    Streets(77716, "Haslach", getResource("Haslach")),
+                    Streets(77716, "Hofstetten", getResource("Hofstetten")),
+                )
 
-            streets.forEach() { street ->
+            streets.forEach { street ->
                 it("should return streets for postcode ${street.postcode} and city ${street.city}") {
                     val response = makeApiRequest("${street.postcode}/${street.city}/streets")
 
@@ -89,6 +91,3 @@ fun makeApiRequest(uri: String? = ""): Response {
         .`when`()
         .get("$baseUrl/$uri")
 }
-
-
-
