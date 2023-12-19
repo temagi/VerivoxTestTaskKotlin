@@ -6,14 +6,12 @@ import io.kotest.matchers.shouldNotBe
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.response.Response
-import java.io.BufferedReader
-import java.io.File
+import model.Postcode
+import model.Streets
+import utils.getResource
+import utils.readProperty
 
 class AddressCheckingServiceTest : DescribeSpec({
-
-    data class Postcode(val postcode: Int, val cities: List<String>)
-
-    data class Streets(val postcode: Int, val city: String, val streets: List<String>)
 
     describe("Address checking service") {
 
@@ -27,12 +25,18 @@ class AddressCheckingServiceTest : DescribeSpec({
             validPostcodes.forEach { code ->
 
                 it("should return cities for postcode ${code.postcode}") {
-                    val response = makeApiRequest(code.postcode)
+                    val response = makeApiRequest("${code.postcode}")
 
-                    response.then().statusCode(200)
-                    response.then().assertThat().contentType(ContentType.JSON)
-                    response.jsonPath().getList<String>("Cities") shouldNotBe emptyList<String>()
-                    response.jsonPath().getList<String>("Cities") shouldBe code.cities
+                    response.apply {
+                        then().apply {
+                            statusCode(200)
+                            then().assertThat().contentType(ContentType.JSON)
+                        }
+                        jsonPath().apply {
+                            getList<String>("Cities") shouldNotBe emptyList<String>()
+                            jsonPath().getList<String>("Cities") shouldBe code.cities
+                        }
+                    }
                 }
             }
         }
@@ -42,7 +46,7 @@ class AddressCheckingServiceTest : DescribeSpec({
             val invalidPostcode = 22333
 
             it("should return HTTP 404 for invalid postcode $invalidPostcode") {
-                val response = makeApiRequest(invalidPostcode)
+                val response = makeApiRequest("$invalidPostcode")
 
                 response.then().statusCode(404)
                 response.body.asString().shouldBe("")
@@ -50,11 +54,6 @@ class AddressCheckingServiceTest : DescribeSpec({
         }
 
         context("Find the streets for a given postcode") {
-
-            fun getResource(name: String): List<String> {
-                val bufferedReader: BufferedReader = File("src/test/resources/$name.txt").bufferedReader(Charsets.UTF_8)
-                return bufferedReader.readLines()
-            }
 
             val streets = listOf(
                 Streets(10409, "Berlin", getResource("Berlin")),
@@ -65,26 +64,31 @@ class AddressCheckingServiceTest : DescribeSpec({
 
             streets.forEach() { street ->
                 it("should return streets for postcode ${street.postcode} and city ${street.city}") {
-                    val response = RestAssured.given()
-                        .contentType(ContentType.JSON)
-                        .`when`()
-                        .get("https://service.verivox.de/geo/latestv2/cities/${street.postcode}/${street.city}/streets")
+                    val response = makeApiRequest("${street.postcode}/${street.city}/streets")
 
-                    response.then().statusCode(200)
-                    response.then().assertThat().contentType(ContentType.JSON)
-                    response.jsonPath().getList<String>("Streets") shouldNotBe emptyList<String>()
-                    response.jsonPath().getList<String>("Streets") shouldBe street.streets
+                    response.apply {
+                        then().apply {
+                            statusCode(200)
+                            assertThat().contentType(ContentType.JSON)
+                        }
+                        jsonPath().apply {
+                            getList<String>("Streets") shouldNotBe emptyList<String>()
+                            jsonPath().getList<String>("Streets") shouldBe street.streets
+                        }
+                    }
                 }
             }
         }
     }
 })
 
-fun makeApiRequest(postcode: Int): Response {
-    val baseUrl = "https://service.verivox.de/geo/latestv2/cities"
+fun makeApiRequest(uri: String? = ""): Response {
+    val baseUrl = readProperty("baseurl")
     return RestAssured.given()
         .contentType(ContentType.JSON)
         .`when`()
-        .get("$baseUrl/$postcode")
+        .get("$baseUrl/$uri")
 }
+
+
 
